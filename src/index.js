@@ -16,7 +16,9 @@ const io = new Server(server, {
   },
 });
 
-app.use(cors());
+cors({
+  origin: "https://orders-products-fe.onrender.com",
+})
 app.use(express.json());
 app.use("/api", routes);
 
