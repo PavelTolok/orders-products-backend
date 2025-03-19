@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const routes = require("./routes");
 const { ApolloServer } = require("@apollo/server");
-const { startStandaloneServer } = require("@apollo/server/standalone");
+const { expressMiddleware } = require("@apollo/server/express4");
 const { typeDefs, resolvers } = require("./graphql");
 
 const app = express();
@@ -20,13 +20,15 @@ app.use(cors());
 app.use(express.json());
 app.use("/api", routes);
 
-// GraphQL сервер
 const gqlServer = new ApolloServer({ typeDefs, resolvers });
+
 (async () => {
-  const { url } = await startStandaloneServer(gqlServer, {
-    listen: { port: 4000 },
-  });
-  console.log(`GraphQL server running at ${url}`);
+  await gqlServer.start();
+  app.use(
+    "/graphql", // GraphQL будет доступен по этому пути
+    expressMiddleware(gqlServer)
+  );
+  console.log(`GraphQL server running at /graphql`);
 })();
 
 let activeSessions = 0;
